@@ -1,4 +1,5 @@
 import { templates } from "../../lib/templates";
+import CopyLink from "../../components/CopyLink";
 
 export const metadata = {
   title: "Template Gallery | Prank Dial AI",
@@ -6,6 +7,7 @@ export const metadata = {
 };
 
 export default function GalleryPage() {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   return (
     <div className="grid" style={{ gap: 24 }}>
       <header>
@@ -20,6 +22,9 @@ export default function GalleryPage() {
             <a className="btn" href={`/?template=${template.id}`}>
               Use template
             </a>
+            <div style={{ marginTop: 12 }}>
+              <CopyLink value={`${baseUrl}/?template=${template.id}`} />
+            </div>
           </div>
         ))}
       </section>

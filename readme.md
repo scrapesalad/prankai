@@ -22,6 +22,16 @@ npm install
 npm run dev
 ```
 
+### Vercel deployment
+
+1. Import the GitHub repo into Vercel.
+2. Set the Root Directory to `web`.
+3. Add environment variables:
+   - `NEXT_PUBLIC_APP_URL`
+   - `VAPI_PRIVATE_KEY`
+   - `VAPI_PHONE_ID`
+4. Deploy.
+
 ## Setup
 
 1. Install dependencies:
