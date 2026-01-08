@@ -78,9 +78,13 @@ export default function UpgradePage() {
       try {
         const clientTokenResponse = await fetch("/api/paypal/client-token", { method: "POST" });
         if (!clientTokenResponse.ok) {
-          throw new Error("Unable to get PayPal client token.");
+          const errorText = await clientTokenResponse.text();
+          throw new Error(`Unable to get PayPal client token: ${errorText}`);
         }
         const { clientToken } = await clientTokenResponse.json();
+        if (typeof clientToken !== "string" || !clientToken.length) {
+          throw new Error("PayPal client token is missing or invalid.");
+        }
 
         const paypalSdk = window.paypal;
         if (!paypalSdk) {
