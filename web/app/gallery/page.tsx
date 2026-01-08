@@ -19,11 +19,11 @@ export default function GalleryPage() {
           <div className="card" key={template.id}>
             <h3>{template.name}</h3>
             <p className="muted">{template.tagline}</p>
-            <a className="btn" href={`/?template=${template.id}`}>
+            <a className="btn" href={`/template/${template.id}`}>
               Use template
             </a>
             <div style={{ marginTop: 12 }}>
-              <CopyLink value={`${baseUrl}/?template=${template.id}`} />
+              <CopyLink value={`${baseUrl}/template/${template.id}`} />
             </div>
           </div>
         ))}

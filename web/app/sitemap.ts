@@ -18,7 +18,7 @@ export default function sitemap() {
   ];
 
   const templateRoutes = templates.map((template) => ({
-    url: `${baseUrl}/?template=${template.id}`,
+    url: `${baseUrl}/template/${template.id}`,
     lastModified: new Date()
   }));
 

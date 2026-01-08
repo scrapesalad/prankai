@@ -39,7 +39,7 @@ export default function HomePage() {
   const [call, setCall] = useState<CallResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/?template=${template.id}`;
+  const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/template/${template.id}`;
   const canStart = isValidE164(phoneNumber) && consentConfirmed;
 
   const startCall = async () => {

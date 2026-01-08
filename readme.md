@@ -8,9 +8,9 @@ The Next.js app lives in `web/` and is designed for Vercel deployment.
 
 ### Environment variables
 
-Set these in Vercel or in `web/.env.local`:
+Set these in Vercel or in `web/.env.local` (do not commit secrets):
 
-- `NEXT_PUBLIC_APP_URL` (example: https://your-domain.vercel.app)
+- `NEXT_PUBLIC_APP_URL` (example: https://prankai.fun)
 - `VAPI_PRIVATE_KEY`
 - `VAPI_PHONE_ID`
 
