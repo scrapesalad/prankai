@@ -1,0 +1,66 @@
+import { leaderboardRows, computeMetrics } from "../../lib/analytics";
+import { templateById } from "../../lib/templates";
+
+export const metadata = {
+  title: "Trending Templates | Prank Dial AI",
+  description: "Top performing prank call templates this week."
+};
+
+const VAPI_API_KEY = process.env.VAPI_PRIVATE_KEY;
+
+const templateName = (call: any) => {
+  const id = call?.metadata?.templateName || call?.assistant?.metadata?.templateName;
+  return id && templateById[id] ? templateById[id].name : "Unknown";
+};
+
+const fetchCalls = async () => {
+  if (!VAPI_API_KEY) return [];
+  const response = await fetch("https://api.vapi.ai/call?page=1&pageSize=20", {
+    headers: {
+      Authorization: `Bearer ${VAPI_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    cache: "no-store"
+  });
+  if (!response.ok) return [];
+  return response.json();
+};
+
+export default async function TrendingPage() {
+  const calls = await fetchCalls();
+  const metrics = computeMetrics(calls, templateName);
+  const leaderboard = leaderboardRows(metrics);
+
+  return (
+    <div className="grid" style={{ gap: 24 }}>
+      <header>
+        <h1>Trending Templates</h1>
+        <p className="muted">Based on recent calls. Update cadence follows new calls.</p>
+      </header>
+      <section className="card">
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              <th style={{ textAlign: "left", paddingBottom: 8 }}>Template</th>
+              <th style={{ textAlign: "right", paddingBottom: 8 }}>Answer rate</th>
+              <th style={{ textAlign: "right", paddingBottom: 8 }}>Hangup &lt;10s</th>
+              <th style={{ textAlign: "right", paddingBottom: 8 }}>Avg duration</th>
+              <th style={{ textAlign: "right", paddingBottom: 8 }}>Laugh events</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leaderboard.map((row) => (
+              <tr key={row.template}>
+                <td style={{ padding: "8px 0" }}>{row.template}</td>
+                <td style={{ textAlign: "right" }}>{row.answerRate}%</td>
+                <td style={{ textAlign: "right" }}>{row.hangupRate}%</td>
+                <td style={{ textAlign: "right" }}>{row.avgDuration}s</td>
+                <td style={{ textAlign: "right" }}>{row.laughEvents}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </div>
+  );
+}
