@@ -6,33 +6,11 @@ import { isValidE164 } from "../lib/validation";
 import { getPurchaseStatus, useCall } from "../lib/purchase";
 import CopyLink from "../components/CopyLink";
 import CallsRemaining from "../components/CallsRemaining";
-import type { Metadata } from "next";
 
 type CallResponse = {
   id?: string;
   monitor?: { listenUrl?: string };
   error?: string;
-};
-
-export const metadata: Metadata = {
-  title: "Prank Dial AI",
-  description: "Prank call templates, live calling, and shareable voice AI experiences.",
-  alternates: {
-    canonical: "https://prankai.com"
-  },
-  openGraph: {
-    title: "Prank Dial AI",
-    description: "Prank call templates, live calling, and shareable voice AI experiences.",
-    url: "https://prankai.com",
-    images: ["/images/pranked.png"],
-    type: "website"
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Prank Dial AI",
-    description: "Prank call templates, live calling, and shareable voice AI experiences.",
-    images: ["/images/pranked.png"]
-  }
 };
 
 export default function HomePage() {

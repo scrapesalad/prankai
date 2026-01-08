@@ -15,10 +15,26 @@ export default function CallsRemaining() {
   });
 
   useEffect(() => {
-    const purchaseStatus = getPurchaseStatus();
-    if (purchaseStatus.hasPurchase) {
-      setStatus(purchaseStatus);
-    }
+    const updateStatus = () => {
+      const purchaseStatus = getPurchaseStatus();
+      if (purchaseStatus.hasPurchase) {
+        setStatus(purchaseStatus);
+      } else {
+        setStatus({
+          hasPurchase: false,
+          remaining: 2,
+          total: 2,
+          plan: null,
+          expiresAt: null
+        });
+      }
+    };
+
+    updateStatus();
+
+    // Listen for storage changes (when calls are used)
+    window.addEventListener("storage", updateStatus);
+    return () => window.removeEventListener("storage", updateStatus);
   }, []);
 
   const planNames: Record<string, string> = {
