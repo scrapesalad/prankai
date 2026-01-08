@@ -8,10 +8,14 @@ export const metadata: Metadata = {
   title: "Prank Call Scripts That Actually Keep People on the Phone",
   description:
     "Prank call scripts that hold attention with structure, curiosity, and ethical pacing, plus how AI makes them better.",
+  alternates: {
+    canonical: "https://prankai.com/blog/prank-call-scripts"
+  },
   openGraph: {
     title: "Prank Call Scripts That Actually Keep People on the Phone",
     description:
       "Prank call scripts that hold attention with structure, curiosity, and ethical pacing, plus how AI makes them better.",
+    url: "https://prankai.com/blog/prank-call-scripts",
     images: [heroImage],
     type: "article"
   },
@@ -25,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export default function PrankCallScriptsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = "https://prankai.com";
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -47,10 +51,35 @@ export default function PrankCallScriptsPage() {
     },
     mainEntityOfPage: `${baseUrl}/blog/prank-call-scripts`
   };
+  const breadcrumbsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: `${baseUrl}/`
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${baseUrl}/blog`
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: "Prank Call Scripts",
+        item: `${baseUrl}/blog/prank-call-scripts`
+      }
+    ]
+  };
 
   return (
     <article className="blog-post">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
       <header className="blog-header">
         <p className="blog-kicker">Founder Notes</p>
         <h1>Prank Call Scripts That Actually Keep People on the Phone</h1>

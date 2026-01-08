@@ -1,15 +1,53 @@
+import type { Metadata } from "next";
 import { templates } from "../../lib/templates";
 import CopyLink from "../../components/CopyLink";
 
-export const metadata = {
-  title: "Template Gallery | Prank Dial AI",
-  description: "Browse prank call templates and share them."
+const baseUrl = "https://prankai.com";
+
+export const metadata: Metadata = {
+  title: "Template Gallery",
+  description: "Browse prank call templates and share them.",
+  alternates: {
+    canonical: `${baseUrl}/gallery`
+  },
+  openGraph: {
+    title: "Template Gallery | Prank Dial AI",
+    description: "Browse prank call templates and share them.",
+    url: `${baseUrl}/gallery`,
+    images: ["/images/pranked.png"],
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Template Gallery | Prank Dial AI",
+    description: "Browse prank call templates and share them.",
+    images: ["/images/pranked.png"]
+  }
 };
 
 export default function GalleryPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const breadcrumbsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: `${baseUrl}/`
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Template Gallery",
+        item: `${baseUrl}/gallery`
+      }
+    ]
+  };
+
   return (
     <div className="grid" style={{ gap: 24 }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
       <header>
         <h1>Template Gallery</h1>
         <p className="muted">Indexable gallery for sharing prank templates.</p>

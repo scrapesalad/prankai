@@ -8,10 +8,14 @@ export const metadata: Metadata = {
   title: "Safe Prank Calling Tips: How to Be Funny Without Being a Jerk",
   description:
     "Safe prank calling tips that keep the humor ethical, consent-aware, and still genuinely funny.",
+  alternates: {
+    canonical: "https://prankai.com/blog/safe-prank-calling-tips"
+  },
   openGraph: {
     title: "Safe Prank Calling Tips: How to Be Funny Without Being a Jerk",
     description:
       "Safe prank calling tips that keep the humor ethical, consent-aware, and still genuinely funny.",
+    url: "https://prankai.com/blog/safe-prank-calling-tips",
     images: [heroImage],
     type: "article"
   },
@@ -25,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export default function SafePrankCallingTipsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = "https://prankai.com";
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -47,10 +51,35 @@ export default function SafePrankCallingTipsPage() {
     },
     mainEntityOfPage: `${baseUrl}/blog/safe-prank-calling-tips`
   };
+  const breadcrumbsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: `${baseUrl}/`
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${baseUrl}/blog`
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: "Safe Prank Calling Tips",
+        item: `${baseUrl}/blog/safe-prank-calling-tips`
+      }
+    ]
+  };
 
   return (
     <article className="blog-post">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
       <header className="blog-header">
         <p className="blog-kicker">Founder Notes</p>
         <h1>Safe Prank Calling Tips: How to Be Funny Without Being a Jerk</h1>

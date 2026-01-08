@@ -8,10 +8,14 @@ export const metadata: Metadata = {
   title: "AI Prank Calls: The Right Way to Be Funny in 2026",
   description:
     "AI prank calls use voice AI to create clever, ethical, and funny conversations without crossing the line.",
+  alternates: {
+    canonical: "https://prankai.com/blog/ai-prank-calls"
+  },
   openGraph: {
     title: "AI Prank Calls: The Right Way to Be Funny in 2026",
     description:
       "AI prank calls use voice AI to create clever, ethical, and funny conversations without crossing the line.",
+    url: "https://prankai.com/blog/ai-prank-calls",
     images: [heroImage],
     type: "article"
   },
@@ -25,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export default function AiPrankCallsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = "https://prankai.com";
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -47,10 +51,35 @@ export default function AiPrankCallsPage() {
     },
     mainEntityOfPage: `${baseUrl}/blog/ai-prank-calls`
   };
+  const breadcrumbsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: `${baseUrl}/`
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${baseUrl}/blog`
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: "AI Prank Calls",
+        item: `${baseUrl}/blog/ai-prank-calls`
+      }
+    ]
+  };
 
   return (
     <article className="blog-post">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
       <header className="blog-header">
         <p className="blog-kicker">Founder Notes</p>
         <h1>AI Prank Calls: The Right Way to Be Funny in 2026</h1>

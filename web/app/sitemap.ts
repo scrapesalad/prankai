@@ -1,7 +1,7 @@
 import { templates } from "../lib/templates";
 
 export default function sitemap() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = "https://prankai.com";
   const routes = [
     {
       url: `${baseUrl}/`,
@@ -13,6 +13,26 @@ export default function sitemap() {
     },
     {
       url: `${baseUrl}/trending`,
+      lastModified: new Date()
+    },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date()
+    },
+    {
+      url: `${baseUrl}/blog/ai-prank-calls`,
+      lastModified: new Date()
+    },
+    {
+      url: `${baseUrl}/blog/prank-call-scripts`,
+      lastModified: new Date()
+    },
+    {
+      url: `${baseUrl}/blog/safe-prank-calling-tips`,
+      lastModified: new Date()
+    },
+    {
+      url: `${baseUrl}/blog/prank-calling-tips-2025`,
       lastModified: new Date()
     }
   ];

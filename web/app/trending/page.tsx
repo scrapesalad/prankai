@@ -1,9 +1,28 @@
+import type { Metadata } from "next";
 import { leaderboardRows, computeMetrics } from "../../lib/analytics";
 import { templateById } from "../../lib/templates";
 
-export const metadata = {
-  title: "Trending Templates | Prank Dial AI",
-  description: "Top performing prank call templates this week."
+const baseUrl = "https://prankai.com";
+
+export const metadata: Metadata = {
+  title: "Trending Templates",
+  description: "Top performing prank call templates this week.",
+  alternates: {
+    canonical: `${baseUrl}/trending`
+  },
+  openGraph: {
+    title: "Trending Templates | Prank Dial AI",
+    description: "Top performing prank call templates this week.",
+    url: `${baseUrl}/trending`,
+    images: ["/images/pranked.png"],
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Trending Templates | Prank Dial AI",
+    description: "Top performing prank call templates this week.",
+    images: ["/images/pranked.png"]
+  }
 };
 
 const VAPI_API_KEY = process.env.VAPI_PRIVATE_KEY;
@@ -30,9 +49,28 @@ export default async function TrendingPage() {
   const calls = await fetchCalls();
   const metrics = computeMetrics(calls, templateName);
   const leaderboard = leaderboardRows(metrics);
+  const breadcrumbsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: `${baseUrl}/`
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Trending Templates",
+        item: `${baseUrl}/trending`
+      }
+    ]
+  };
 
   return (
     <div className="grid" style={{ gap: 24 }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
       <header>
         <h1>Trending Templates</h1>
         <p className="muted">Based on recent calls. Update cadence follows new calls.</p>

@@ -1,10 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import { templates, templateById } from "../../../lib/templates";
 import { buildSystemPrompt, normalizeText, validatePromptInput } from "../../../lib/prompt";
+import { rateLimit, getClientIdentifier } from "../../../lib/rate-limit";
+import { logSecurityEvent } from "../../../lib/audit-log";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 export async function POST(request: NextRequest) {
+  const clientIp = getClientIdentifier(request);
+
+  // Rate limiting: 20 dry-runs per hour per IP
+  const rateLimitResult = await rateLimit(`dry-run:${clientIp}`, {
+    maxRequests: 20,
+    windowMs: 60 * 60 * 1000 // 1 hour
+  });
+
+  if (!rateLimitResult.success) {
+    logSecurityEvent({
+      ip: clientIp,
+      event: "rate_limit",
+      reason: "Dry-run rate limit exceeded",
+      metadata: { limit: rateLimitResult.limit }
+    });
+
+    return NextResponse.json(
+      {
+        error: "Rate limit exceeded. You can run 20 dry-runs per hour. Please try again later."
+      },
+      {
+        status: 429,
+        headers: {
+          "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": new Date(rateLimitResult.reset).toISOString()
+        }
+      }
+    );
+  }
+
   if (!OPENAI_API_KEY) {
     return NextResponse.json({ error: "Missing OpenAI credentials." }, { status: 500 });
   }
@@ -66,5 +99,14 @@ export async function POST(request: NextRequest) {
   }
 
   const content = data?.choices?.[0]?.message?.content;
-  return NextResponse.json({ content });
+  return NextResponse.json(
+    { content },
+    {
+      headers: {
+        "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+        "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+        "X-RateLimit-Reset": new Date(rateLimitResult.reset).toISOString()
+      }
+    }
+  );
 }

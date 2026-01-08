@@ -1,4 +1,26 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Blog",
+  description: "Founder notes, prank call strategy, and ethical AI prank calling tips.",
+  alternates: {
+    canonical: "https://prankai.com/blog"
+  },
+  openGraph: {
+    title: "Prank Dial AI Blog",
+    description: "Founder notes, prank call strategy, and ethical AI prank calling tips.",
+    url: "https://prankai.com/blog",
+    images: ["/images/pranked.png"],
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Prank Dial AI Blog",
+    description: "Founder notes, prank call strategy, and ethical AI prank calling tips.",
+    images: ["/images/pranked.png"]
+  }
+};
 
 const posts = [
   {
@@ -18,12 +40,39 @@ const posts = [
     href: "/blog/safe-prank-calling-tips",
     description:
       "Consent-aware, non-threatening, and still hilarious. Practical rules for ethical prank calling."
+  },
+  {
+    title: "Prank Calling Tips: How to Pull Off Funny (Not Mean) Prank Calls in 2025",
+    href: "/blog/prank-calling-tips-2025",
+    description:
+      "Beginner-friendly tips for funny, harmless prank calls with the right tone and timing."
   }
 ];
 
 export default function BlogIndexPage() {
+  const baseUrl = "https://prankai.com";
+  const breadcrumbsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: `${baseUrl}/`
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${baseUrl}/blog`
+      }
+    ]
+  };
+
   return (
     <div className="grid" style={{ gap: 24 }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
       <header>
         <h1>Prank Dial AI Blog</h1>
         <p className="muted">

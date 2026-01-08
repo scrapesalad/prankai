@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Template, templates, templateById } from "../lib/templates";
 import { isValidE164 } from "../lib/validation";
+import { getPurchaseStatus, useCall } from "../lib/purchase";
 import CopyLink from "../components/CopyLink";
+import CallsRemaining from "../components/CallsRemaining";
+import type { Metadata } from "next";
 
 type CallResponse = {
   id?: string;
@@ -11,7 +14,44 @@ type CallResponse = {
   error?: string;
 };
 
+export const metadata: Metadata = {
+  title: "Prank Dial AI",
+  description: "Prank call templates, live calling, and shareable voice AI experiences.",
+  alternates: {
+    canonical: "https://prankai.com"
+  },
+  openGraph: {
+    title: "Prank Dial AI",
+    description: "Prank call templates, live calling, and shareable voice AI experiences.",
+    url: "https://prankai.com",
+    images: ["/images/pranked.png"],
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Prank Dial AI",
+    description: "Prank call templates, live calling, and shareable voice AI experiences.",
+    images: ["/images/pranked.png"]
+  }
+};
+
 export default function HomePage() {
+  const baseUrl = "https://prankai.com";
+  const softwareJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Prank Dial AI",
+    applicationCategory: "EntertainmentApplication",
+    operatingSystem: "Web",
+    url: baseUrl,
+    description: "Prank call templates, live calling, and shareable voice AI experiences.",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD"
+    }
+  };
+
   const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
   const templateParam = params?.get("template") || "";
   const defaultTemplate = templateById[templateParam] || templates[0];
@@ -109,6 +149,14 @@ export default function HomePage() {
       setStatus("Recording consent required for this jurisdiction.");
       return;
     }
+
+    // Check for purchased calls
+    const purchaseStatus = getPurchaseStatus();
+    if (!purchaseStatus.hasPurchase && purchaseStatus.remaining === 0) {
+      setStatus("No calls remaining. Purchase more calls to continue.");
+      return;
+    }
+
     setLoading(true);
     try {
       const templatePayload = isCustomTemplate
@@ -119,6 +167,11 @@ export default function HomePage() {
             firstMessage: template.firstMessage
           }
         : null;
+
+      // Get purchase data if available
+      const raw = typeof window !== "undefined" ? localStorage.getItem("prankai.purchase") : null;
+      const purchase = raw ? JSON.parse(raw) : null;
+
       const response = await fetch("/api/call", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -135,7 +188,8 @@ export default function HomePage() {
           confusion,
           escalation,
           resolution,
-          silenceTimeout
+          silenceTimeout,
+          purchase
         })
       });
       const data = (await response.json()) as CallResponse;
@@ -144,6 +198,13 @@ export default function HomePage() {
       } else {
         setCall(data);
         setStatus("Call started.");
+
+        // Track call usage for purchased plans
+        if (purchaseStatus.hasPurchase) {
+          useCall();
+          // Force re-render of CallsRemaining component
+          window.dispatchEvent(new Event("storage"));
+        }
       }
     } catch (err) {
       setStatus("Network error starting call.");
@@ -225,9 +286,10 @@ export default function HomePage() {
 
   return (
     <div className="grid" style={{ gap: 24 }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }} />
       <section className="hero">
         <div className="hero-content">
-          <div className="hero-tag">Prank Palz Studio</div>
+          <div className="hero-tag">Deepthink Studio</div>
           <h1>Prank Dial AI</h1>
           <p className="hero-subtitle">
             Design playful calls, remix voice templates, and track what makes the laughs land.
@@ -237,9 +299,19 @@ export default function HomePage() {
             <span>Shareable templates</span>
             <span>Live listen</span>
           </div>
+          <div className="hero-host">
+            <div className="hero-host-title">Meet Pranklyn</div>
+            <p className="hero-host-copy">
+              Pranklyn is your chaos-with-a-heart guide. She riffs fast, keeps the tone sweet, and knows exactly when
+              to land the punchline before the vibe gets weird.
+            </p>
+          </div>
         </div>
         <div className="hero-art">
-          <img src="/images/pranked.png" alt="Prank Palz illustration" />
+          <div className="hero-mascot">
+            <img src="/images/mascot/uvO5q40CRFOYaeRVd_6fTg.jpg" alt="Pranklyn host smiling and waving" />
+            <span className="hero-mascot-badge">Pranklyn, your prank co-pilot</span>
+          </div>
         </div>
       </section>
 
@@ -279,10 +351,16 @@ export default function HomePage() {
         </div>
       </section>
 
+      <CallsRemaining />
+
       <section className="card grid" style={{ gap: 16 }}>
         <div className="grid grid-2">
           <div>
             <div className="label">Template</div>
+            <div className="mascot-hint">
+              <img src="/images/mascot/uvO5q40CRFOYaeRVd_6fTg.jpg" alt="Pranklyn mascot tip" />
+              <p>Pick the vibe first. This sets the base script and tone.</p>
+            </div>
             <select className="select" value={templateId} onChange={(e) => setTemplateId(e.target.value)}>
               {templateList.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -294,12 +372,20 @@ export default function HomePage() {
           </div>
           <div>
             <div className="label">Share URL</div>
+            <div className="mascot-hint">
+              <img src="/images/mascot/in-A3UI2SOaqPeoVXtYUww.jpg" alt="Pranklyn mascot tip" />
+              <p>Send this link to anyone who should reuse the template.</p>
+            </div>
             {isCustomTemplate ? <p className="muted">Custom templates are stored locally.</p> : <CopyLink value={shareUrl} />}
           </div>
         </div>
         <div className="grid grid-2">
           <div>
             <div className="label">Save as custom template</div>
+            <div className="mascot-hint">
+              <img src="/images/mascot/4qTGWF2-TSKMjaOMMPhtow.webp" alt="Pranklyn mascot tip" />
+              <p>Name it so you can find the remix later.</p>
+            </div>
             <input
               className="input"
               value={customTemplateName}
@@ -320,21 +406,37 @@ export default function HomePage() {
         <div className="grid grid-2">
           <div>
             <div className="label">Culprit name</div>
+            <div className="mascot-hint">
+              <img src="/images/mascot/pcCg5WDRTPKzKEtQBkc2Xw.jpg" alt="Pranklyn mascot tip" />
+              <p>Use their first name only to keep it friendly.</p>
+            </div>
             <input className="input" value={culpritName} onChange={(e) => setCulpritName(e.target.value)} />
           </div>
           <div>
             <div className="label">Caller persona</div>
+            <div className="mascot-hint">
+              <img src="/images/mascot/M0rNa8HyTC2PGiZArFeDKQ.webp" alt="Pranklyn mascot tip" />
+              <p>Give the AI a believable identity to anchor the call.</p>
+            </div>
             <input className="input" value={callerName} onChange={(e) => setCallerName(e.target.value)} />
           </div>
         </div>
         <div>
           <div className="label">Custom prompt</div>
+          <div className="mascot-hint">
+            <img src="/images/mascot/in-A3UI2SOaqPeoVXtYUww.jpg" alt="Pranklyn mascot tip" />
+            <p>Add guardrails or style notes you want the AI to follow.</p>
+          </div>
           <textarea className="textarea" rows={3} value={customPrompt} onChange={(e) => setCustomPrompt(e.target.value)} />
         </div>
       </section>
 
       <section className="card grid" style={{ gap: 16 }}>
         <div className="section-title">Consent & Safety</div>
+        <div className="mascot-hint">
+          <img src="/images/mascot/8CXPHlLAQ4KMkxQv1u594Q.webp" alt="Pranklyn mascot tip" />
+          <p>Confirm permission first. This keeps the fun legal and respectful.</p>
+        </div>
         <label className="muted">
           <input type="checkbox" checked={consentConfirmed} onChange={(e) => setConsentConfirmed(e.target.checked)} /> I have consent to place
           this call and record it where required by law.
@@ -342,6 +444,10 @@ export default function HomePage() {
         <div className="grid grid-2">
           <div>
             <div className="label">Jurisdiction</div>
+            <div className="mascot-hint">
+              <img src="/images/mascot/M0rNa8HyTC2PGiZArFeDKQ.webp" alt="Pranklyn mascot tip" />
+              <p>Select the consent rule for the caller's location.</p>
+            </div>
             <select className="select" value={jurisdiction} onChange={(e) => setJurisdiction(e.target.value)}>
               <option value="one-party">One-party consent</option>
               <option value="two-party">Two-party consent</option>
@@ -349,6 +455,10 @@ export default function HomePage() {
             </select>
           </div>
           <div>
+            <div className="mascot-hint">
+              <img src="/images/mascot/uvO5q40CRFOYaeRVd_6fTg.jpg" alt="Pranklyn mascot tip" />
+              <p>Check this only when you've asked for recording permission.</p>
+            </div>
             <label className="muted">
               <input type="checkbox" checked={recordingConsent} onChange={(e) => setRecordingConsent(e.target.checked)} /> I have explicit
               consent to record.
@@ -362,23 +472,43 @@ export default function HomePage() {
         <div className="grid grid-2">
           <div>
             <div className="label">Hook</div>
+            <div className="mascot-hint">
+              <img src="/images/mascot/mnMIvIQ3RWCPDFwRA_k-EA.jpg" alt="Pranklyn mascot tip" />
+              <p>Open with a friendly reason so they stay engaged.</p>
+            </div>
             <textarea className="textarea" rows={2} value={hook} onChange={(e) => setHook(e.target.value)} />
           </div>
           <div>
             <div className="label">Confusion</div>
+            <div className="mascot-hint">
+              <img src="/images/mascot/8CXPHlLAQ4KMkxQv1u594Q.webp" alt="Pranklyn mascot tip" />
+              <p>Add a tiny mix-up that needs clarification.</p>
+            </div>
             <textarea className="textarea" rows={2} value={confusion} onChange={(e) => setConfusion(e.target.value)} />
           </div>
           <div>
             <div className="label">Escalation</div>
+            <div className="mascot-hint">
+              <img src="/images/mascot/fnYiHBrJQ_SJkaNxuVHOlg.webp" alt="Pranklyn mascot tip" />
+              <p>Raise the stakes slightly while staying kind.</p>
+            </div>
             <textarea className="textarea" rows={2} value={escalation} onChange={(e) => setEscalation(e.target.value)} />
           </div>
           <div>
             <div className="label">Resolution</div>
+            <div className="mascot-hint">
+              <img src="/images/mascot/uvO5q40CRFOYaeRVd_6fTg.jpg" alt="Pranklyn mascot tip" />
+              <p>End with an easy out so it feels polite.</p>
+            </div>
             <textarea className="textarea" rows={2} value={resolution} onChange={(e) => setResolution(e.target.value)} />
           </div>
         </div>
         <div>
           <div className="label">Silence timeout (seconds)</div>
+          <div className="mascot-hint">
+            <img src="/images/mascot/in-A3UI2SOaqPeoVXtYUww.jpg" alt="Pranklyn mascot tip" />
+            <p>Shorter timeouts keep the conversation moving.</p>
+          </div>
           <input
             className="input"
             type="number"
@@ -394,6 +524,10 @@ export default function HomePage() {
         <div className="section-title">Dry-run chat (text)</div>
         <div>
           <div className="label">User reply</div>
+          <div className="mascot-hint">
+            <img src="/images/mascot/4qTGWF2-TSKMjaOMMPhtow.webp" alt="Pranklyn mascot tip" />
+            <p>Type a sample reply to preview how the AI handles it.</p>
+          </div>
           <input className="input" value={dryRunMessage} onChange={(e) => setDryRunMessage(e.target.value)} />
         </div>
         <button className="btn" onClick={runDryRun} disabled={dryRunLoading}>
@@ -412,11 +546,23 @@ export default function HomePage() {
         <div className="section-title">Make a call</div>
         <div>
           <div className="label">Phone number (E.164)</div>
+          <div className="mascot-hint">
+            <img src="/images/mascot/M0rNa8HyTC2PGiZArFeDKQ.webp" alt="Pranklyn mascot tip" />
+            <p>Include country code, like +1 555 123 4567.</p>
+          </div>
           <input className="input" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+        </div>
+        <div className="mascot-hint">
+          <img src="/images/mascot/pcCg5WDRTPKzKEtQBkc2Xw.jpg" alt="Pranklyn mascot tip" />
+          <p>Recordings help you review what landed best.</p>
         </div>
         <label className="muted">
           <input type="checkbox" checked={recordCall} onChange={(e) => setRecordCall(e.target.checked)} /> Record this call
         </label>
+        <div className="mascot-hint">
+          <img src="/images/mascot/mnMIvIQ3RWCPDFwRA_k-EA.jpg" alt="Pranklyn mascot tip" />
+          <p>Live listen lets you monitor without jumping in.</p>
+        </div>
         <label className="muted">
           <input type="checkbox" checked={liveListen} onChange={(e) => setLiveListen(e.target.checked)} /> Enable live listen
         </label>
