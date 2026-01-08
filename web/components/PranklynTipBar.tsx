@@ -3,14 +3,35 @@
 import { usePathname } from "next/navigation";
 
 const tips = [
-  "Keep it playful and believable. The best pranks sound like a real mix-up.",
-  "Give the AI a clear persona. Names and roles make the script feel grounded.",
-  "Short hooks win. One clean reason for the call is all you need.",
-  "Stay kind on the escalation. Light urgency beats heavy pressure.",
-  "Wrap it up fast. A polite exit keeps the laugh friendly.",
-  "Test with a dry-run before dialing. It saves awkward edits later.",
-  "Share the template when it hits. Good scripts deserve a second run.",
-  "Consent first, always. It keeps Pranklyn approved and legal."
+  "Pranklyn says: keep it playful and believable. The best pranks sound like a real mix-up.",
+  "Pranklyn says: give the AI a clear persona. Names and roles make the script feel grounded.",
+  "Pranklyn says: short hooks win. One clean reason for the call is all you need.",
+  "Pranklyn says: stay kind on the escalation. Light urgency beats heavy pressure.",
+  "Pranklyn says: wrap it up fast. A polite exit keeps the laugh friendly.",
+  "Pranklyn says: test with a dry-run before dialing. It saves awkward edits later.",
+  "Pranklyn says: share the template when it hits. Good scripts deserve a second run.",
+  "Pranklyn says: consent first, always. It keeps the fun legal and easy."
+];
+
+const blogTips = [
+  "Pranklyn says: skim the bold headers first, then read the section you actually need.",
+  "Pranklyn says: if a tip feels mean, rewrite it until it feels like a wink.",
+  "Pranklyn says: structure beats shock. A tight arc is funnier than chaos.",
+  "Pranklyn says: bookmark the ethics checklist. It keeps your jokes shareable."
+];
+
+const galleryTips = [
+  "Pranklyn says: pick a template with a hook you can say in one breath.",
+  "Pranklyn says: tap a template, then remix the hook to match your friend.",
+  "Pranklyn says: share the template link when it lands. Good pranks repeat.",
+  "Pranklyn says: keep the tone friendly; the gallery is built for laughs, not shocks."
+];
+
+const templateTips = [
+  "Pranklyn says: read the preview out loud. If it sounds odd, tweak it.",
+  "Pranklyn says: borrow the structure, then personalize the opening line.",
+  "Pranklyn says: if the first message feels stiff, soften it before you call.",
+  "Pranklyn says: use this template as a base, not a script you must follow."
 ];
 
 const images = [
@@ -36,7 +57,12 @@ const hashString = (value: string) => {
 export default function PranklynTipBar() {
   const pathname = usePathname() || "/";
   const index = hashString(pathname);
-  const tip = tips[index % tips.length];
+  const isBlogPost = pathname.startsWith("/blog/") && pathname.split("/").length > 2;
+  const isBlogIndex = pathname === "/blog";
+  const isGallery = pathname === "/gallery";
+  const isTemplate = pathname.startsWith("/template/");
+  const tipPool = isBlogIndex || isBlogPost ? blogTips : isGallery ? galleryTips : isTemplate ? templateTips : tips;
+  const tip = tipPool[index % tipPool.length];
   const heroImage = images[index % images.length];
 
   return (
