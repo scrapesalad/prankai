@@ -1,9 +1,10 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function SuccessPage() {
+function SuccessContent() {
   const searchParams = useSearchParams();
   const plan = searchParams.get("plan");
 
@@ -68,5 +69,13 @@ export default function SuccessPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<div style={{ textAlign: "center", padding: 60 }}>Loading...</div>}>
+      <SuccessContent />
+    </Suspense>
   );
 }
