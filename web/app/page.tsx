@@ -405,7 +405,7 @@ export default function HomePage() {
             <img src="/images/mascot/in-A3UI2SOaqPeoVXtYUww.jpg" alt="Pranklyn mascot tip" />
             <p>Add guardrails or style notes you want the AI to follow.</p>
           </div>
-          <textarea className="textarea" rows={3} value={customPrompt} onChange={(e) => setCustomPrompt(e.target.value)} />
+          <textarea className="textarea" rows={6} value={customPrompt} onChange={(e) => setCustomPrompt(e.target.value)} />
         </div>
       </section>
 
@@ -454,7 +454,7 @@ export default function HomePage() {
               <img src="/images/mascot/mnMIvIQ3RWCPDFwRA_k-EA.jpg" alt="Pranklyn mascot tip" />
               <p>Open with a friendly reason so they stay engaged.</p>
             </div>
-            <textarea className="textarea" rows={2} value={hook} onChange={(e) => setHook(e.target.value)} />
+            <textarea className="textarea" rows={4} value={hook} onChange={(e) => setHook(e.target.value)} />
           </div>
           <div>
             <div className="label">Confusion</div>
@@ -462,7 +462,7 @@ export default function HomePage() {
               <img src="/images/mascot/8CXPHlLAQ4KMkxQv1u594Q.webp" alt="Pranklyn mascot tip" />
               <p>Add a tiny mix-up that needs clarification.</p>
             </div>
-            <textarea className="textarea" rows={2} value={confusion} onChange={(e) => setConfusion(e.target.value)} />
+            <textarea className="textarea" rows={4} value={confusion} onChange={(e) => setConfusion(e.target.value)} />
           </div>
           <div>
             <div className="label">Escalation</div>
@@ -470,7 +470,7 @@ export default function HomePage() {
               <img src="/images/mascot/fnYiHBrJQ_SJkaNxuVHOlg.webp" alt="Pranklyn mascot tip" />
               <p>Raise the stakes slightly while staying kind.</p>
             </div>
-            <textarea className="textarea" rows={2} value={escalation} onChange={(e) => setEscalation(e.target.value)} />
+            <textarea className="textarea" rows={4} value={escalation} onChange={(e) => setEscalation(e.target.value)} />
           </div>
           <div>
             <div className="label">Resolution</div>
@@ -478,7 +478,7 @@ export default function HomePage() {
               <img src="/images/mascot/uvO5q40CRFOYaeRVd_6fTg.jpg" alt="Pranklyn mascot tip" />
               <p>End with an easy out so it feels polite.</p>
             </div>
-            <textarea className="textarea" rows={2} value={resolution} onChange={(e) => setResolution(e.target.value)} />
+            <textarea className="textarea" rows={4} value={resolution} onChange={(e) => setResolution(e.target.value)} />
           </div>
         </div>
         <div>
@@ -515,7 +515,7 @@ export default function HomePage() {
         {dryRunResponse && (
           <div>
             <div className="label">Assistant reply</div>
-            <textarea className="textarea" rows={6} readOnly value={dryRunResponse} />
+            <textarea className="textarea" rows={10} readOnly value={dryRunResponse} />
           </div>
         )}
       </section>

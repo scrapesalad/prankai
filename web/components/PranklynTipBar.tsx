@@ -56,6 +56,12 @@ const hashString = (value: string) => {
 
 export default function PranklynTipBar() {
   const pathname = usePathname() || "/";
+  
+  // Hide on homepage
+  if (pathname === "/") {
+    return null;
+  }
+  
   const index = hashString(pathname);
   const isBlogPost = pathname.startsWith("/blog/") && pathname.split("/").length > 2;
   const isBlogIndex = pathname === "/blog";

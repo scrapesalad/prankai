@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import MascotHint from "../../../components/MascotHint";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -34,6 +35,10 @@ function SuccessContent() {
 
       <div className="card">
         <h2>What's Next?</h2>
+        <MascotHint
+          text="Pranklyn says: start with a short, friendly hook and keep the exit clean."
+          image="/images/mascot/uvO5q40CRFOYaeRVd_6fTg.jpg"
+        />
         <ol style={{ margin: "16px 0 0", paddingLeft: 20 }}>
           <li style={{ marginBottom: 12 }}>
             <strong>Head to the home page</strong> - Your calls are ready to use immediately

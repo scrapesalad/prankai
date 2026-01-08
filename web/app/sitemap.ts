@@ -1,5 +1,7 @@
 import { templates } from "../lib/templates";
 
+export const revalidate = 86400;
+
 export default function sitemap() {
   const baseUrl = "https://prankai.fun";
   const routes = [
