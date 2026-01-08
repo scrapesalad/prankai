@@ -1,7 +1,7 @@
 import { templates } from "../lib/templates";
 
 export default function sitemap() {
-  const baseUrl = "https://prankai.com";
+  const baseUrl = "https://prankai.fun";
   const routes = [
     {
       url: `${baseUrl}/`,

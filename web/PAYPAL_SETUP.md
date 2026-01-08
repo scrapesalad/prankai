@@ -24,26 +24,23 @@ Your PrankAI app now has a complete PayPal payment system integrated! Users can 
 
 ## Setup Instructions
 
-### Step 1: Get Your PayPal Client ID
+### Step 1: Get Your PayPal Client ID and Secret
 
 1. Go to [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/)
 2. Log in with your PayPal account (lafaverspam@gmail.com)
 3. Navigate to **Apps & Credentials**
 4. Create a new app or use an existing one
-5. Copy your **Client ID** (starts with "AX..." or similar)
+5. Copy your **Client ID** and **Client Secret**
 
-### Step 2: Add Client ID to Your App
+### Step 2: Add PayPal Credentials to `.env.local`
 
-Open `k:\prankai\web\app\upgrade\page.tsx` and replace line 16:
+Add the following to `k:\prankai\web\.env.local`:
 
-**Current:**
-```typescript
-script.src = "https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD&intent=capture";
-```
-
-**Replace with:**
-```typescript
-script.src = "https://www.paypal.com/sdk/js?client-id=YOUR_ACTUAL_CLIENT_ID_HERE&currency=USD&intent=capture";
+```bash
+PAYPAL_CLIENT_ID=your_paypal_client_id_here
+PAYPAL_CLIENT_SECRET=your_paypal_client_secret_here
+PAYPAL_ENV=sandbox
+NEXT_PUBLIC_PAYPAL_ENV=sandbox
 ```
 
 ### Step 3: Test in Sandbox Mode (Recommended)
@@ -51,17 +48,25 @@ script.src = "https://www.paypal.com/sdk/js?client-id=YOUR_ACTUAL_CLIENT_ID_HERE
 Before going live, test with PayPal Sandbox:
 
 1. In PayPal Developer Dashboard, switch to **Sandbox** mode
-2. Use the **Sandbox Client ID** in your code
+2. Use the **Sandbox Client ID and Secret** in `.env.local`
 3. Create test buyer/seller accounts in the dashboard
 4. Test all three payment tiers
+
+### Step 3a: Run a Test Payment (Card or PayPal)
+
+From the PayPal dashboard, use the **Make a Test Payment** flow:
+
+1. Choose **Successful card** and use the provided test card number.
+2. Use any future expiry date and any CVC.
+3. Complete the checkout on `/upgrade` and confirm the success page loads.
 
 ### Step 4: Switch to Production
 
 Once testing is complete:
 
 1. Switch to **Live** mode in PayPal Dashboard
-2. Get your **Live Client ID**
-3. Replace the sandbox Client ID with the live one
+2. Get your **Live Client ID and Secret**
+3. Set `PAYPAL_ENV=live` and `NEXT_PUBLIC_PAYPAL_ENV=live`
 4. Deploy to production
 
 ## How It Works
@@ -78,9 +83,9 @@ Once testing is complete:
 ### Technical Flow
 
 1. **Payment Processing**
-   - PayPal SDK handles the checkout
-   - Payment goes directly to lafaverspam@gmail.com
-   - Order ID returned on success
+   - PayPal JavaScript SDK v6 initializes with a server-generated client token
+   - Orders are created server-side using PayPal API
+   - The client captures the order after approval
 
 2. **Call Tracking**
    - Purchase stored in `localStorage` as JSON
@@ -99,6 +104,10 @@ Once testing is complete:
 - `/web/app/upgrade/page.tsx` - Upgrade page with PayPal buttons
 - `/web/app/upgrade/success/page.tsx` - Success confirmation page
 - `/web/app/api/verify-purchase/route.ts` - Purchase verification endpoint
+- `/web/app/api/paypal/client-token/route.ts` - Client token endpoint for SDK v6
+- `/web/app/api/paypal/orders/create/route.ts` - Server-side order creation
+- `/web/app/api/paypal/orders/[orderId]/capture/route.ts` - Server-side order capture
+- `/web/lib/paypal.ts` - PayPal API helpers
 - `/web/lib/purchase.ts` - Purchase tracking utilities
 - `/web/components/CallsRemaining.tsx` - Shows remaining calls widget
 
@@ -111,8 +120,13 @@ Once testing is complete:
 Add to `.env.local`:
 
 ```bash
+PAYPAL_CLIENT_ID=your_paypal_client_id_here
+PAYPAL_CLIENT_SECRET=your_paypal_client_secret_here
+PAYPAL_ENV=sandbox
+NEXT_PUBLIC_PAYPAL_ENV=sandbox
+
 # Optional: For webhook verification (production enhancement)
-PAYPAL_WEBHOOK_ID=your_webhook_id_here
+PAYPAL_WEBHOOK_ID=your_paypal_webhook_id_here
 ```
 
 ## Security Notes

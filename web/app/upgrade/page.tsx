@@ -1,25 +1,67 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { Metadata } from "next";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
-declare global {
-  interface Window {
-    paypal?: any;
+type PlanId = "daily" | "weekly" | "monthly";
+
+const PLAN_DETAILS: Record<
+  PlanId,
+  {
+    price: string;
+    calls: number;
+    durationDays: number;
+    description: string;
+    label: string;
+    validity: string;
   }
-}
+> = {
+  daily: {
+    price: "4.99",
+    calls: 10,
+    durationDays: 1,
+    description: "PrankAI Daily Pass - 10 Calls",
+    label: "Daily Pass",
+    validity: "Valid for 24 hours"
+  },
+  weekly: {
+    price: "14.99",
+    calls: 50,
+    durationDays: 7,
+    description: "PrankAI Weekly Pass - 50 Calls",
+    label: "Weekly Pass",
+    validity: "Valid for 7 days"
+  },
+  monthly: {
+    price: "29.99",
+    calls: 999,
+    durationDays: 30,
+    description: "PrankAI Monthly Pass - Unlimited Calls",
+    label: "Monthly Pass",
+    validity: "Valid for 30 days"
+  }
+};
 
 export default function UpgradePage() {
-  const [loading, setLoading] = useState(true);
+  const [sdkLoaded, setSdkLoaded] = useState(false);
+  const [paypalStatus, setPaypalStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [paypalError, setPaypalError] = useState<string | null>(null);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    // Load PayPal SDK
+    // Load PayPal SDK v6
     const script = document.createElement("script");
+    const paypalEnv = process.env.NEXT_PUBLIC_PAYPAL_ENV || "sandbox";
     script.src =
-      "https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD&intent=capture";
+      paypalEnv === "live"
+        ? "https://www.paypal.com/web-sdk/v6/core"
+        : "https://www.sandbox.paypal.com/web-sdk/v6/core";
     script.async = true;
-    script.onload = () => setLoading(false);
+    script.onload = () => setSdkLoaded(true);
+    script.onerror = () => {
+      setPaypalStatus("error");
+      setPaypalError("Unable to load PayPal. Please try again later.");
+    };
     document.body.appendChild(script);
 
     return () => {
@@ -28,141 +70,119 @@ export default function UpgradePage() {
   }, []);
 
   useEffect(() => {
-    if (loading || !window.paypal) return;
+    if (!sdkLoaded || !window.paypal || initializedRef.current) return;
+    initializedRef.current = true;
 
-    // Daily Pass - 10 calls
-    window.paypal
-      .Buttons({
-        createOrder: (data: any, actions: any) => {
-          return actions.order.create({
-            purchase_units: [
-              {
-                description: "PrankAI Daily Pass - 10 Calls",
-                amount: {
-                  currency_code: "USD",
-                  value: "4.99"
-                },
-                payee: {
-                  email_address: "lafaverspam@gmail.com"
+    const initializeButtons = async () => {
+      try {
+        const clientTokenResponse = await fetch("/api/paypal/client-token", { method: "POST" });
+        if (!clientTokenResponse.ok) {
+          throw new Error("Unable to get PayPal client token.");
+        }
+        const { clientToken } = await clientTokenResponse.json();
+
+        const paypalSdk = window.paypal;
+        if (!paypalSdk) {
+          throw new Error("PayPal SDK not available.");
+        }
+
+        const sdkInstance = await paypalSdk.createInstance({
+          clientToken,
+          components: ["paypal-payments"],
+          pageType: "checkout"
+        });
+
+        const eligibleMethods = await sdkInstance.findEligibleMethods({ currencyCode: "USD" });
+        if (!eligibleMethods.isEligible("paypal")) {
+          setPaypalStatus("error");
+          setPaypalError("PayPal is unavailable for your region or device.");
+          return;
+        }
+
+        const setupButton = async (plan: PlanId) => {
+          const button = document.querySelector(`paypal-button[data-plan="${plan}"]`);
+          if (!button) return;
+
+          const paymentSessionOptions = {
+            async onApprove(data: { orderId: string }) {
+              try {
+                const captureResponse = await fetch(`/api/paypal/orders/${data.orderId}/capture`, {
+                  method: "POST"
+                });
+                if (!captureResponse.ok) {
+                  throw new Error("Failed to capture PayPal order.");
                 }
+                const orderData = await captureResponse.json();
+
+                const planDetails = PLAN_DETAILS[plan];
+                const purchase = {
+                  orderId: orderData.id,
+                  plan,
+                  calls: planDetails.calls,
+                  callsUsed: 0,
+                  purchasedAt: new Date().toISOString(),
+                  expiresAt: new Date(
+                    Date.now() + planDetails.durationDays * 24 * 60 * 60 * 1000
+                  ).toISOString()
+                };
+                localStorage.setItem("prankai.purchase", JSON.stringify(purchase));
+
+                window.location.href = `/upgrade/success?plan=${plan}`;
+              } catch (error) {
+                console.error("Payment capture failed:", error);
+                alert("Payment capture failed. Please contact support.");
               }
-            ],
-            application_context: {
-              shipping_preference: "NO_SHIPPING"
+            },
+            onCancel(data: any) {
+              console.log("Payment cancelled:", data);
+            },
+            onError(error: any) {
+              console.error("PayPal error:", error);
+              alert("Payment failed. Please try again.");
+            }
+          };
+
+          const paypalPaymentSession = sdkInstance.createPayPalOneTimePaymentSession(
+            paymentSessionOptions
+          );
+
+          button.removeAttribute("hidden");
+          button.addEventListener("click", async () => {
+            try {
+              await paypalPaymentSession.start({ presentationMode: "auto" }, createOrder(plan));
+            } catch (error) {
+              console.error("PayPal start error:", error);
+              alert("Unable to start PayPal checkout. Please try again.");
             }
           });
-        },
-        onApprove: async (data: any, actions: any) => {
-          const order = await actions.order.capture();
-          console.log("Payment successful:", order);
+        };
 
-          // Store purchase in localStorage
-          const purchase = {
-            orderId: order.id,
-            plan: "daily",
-            calls: 10,
-            purchasedAt: new Date().toISOString(),
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-          };
-          localStorage.setItem("prankai.purchase", JSON.stringify(purchase));
-
-          window.location.href = "/upgrade/success?plan=daily";
-        },
-        onError: (err: any) => {
-          console.error("PayPal error:", err);
-          alert("Payment failed. Please try again.");
-        }
-      })
-      .render("#paypal-daily");
-
-    // Weekly Pass - 50 calls
-    window.paypal
-      .Buttons({
-        createOrder: (data: any, actions: any) => {
-          return actions.order.create({
-            purchase_units: [
-              {
-                description: "PrankAI Weekly Pass - 50 Calls",
-                amount: {
-                  currency_code: "USD",
-                  value: "14.99"
-                },
-                payee: {
-                  email_address: "lafaverspam@gmail.com"
-                }
-              }
-            ],
-            application_context: {
-              shipping_preference: "NO_SHIPPING"
-            }
+        const createOrder = async (plan: PlanId) => {
+          const response = await fetch("/api/paypal/orders/create", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ plan })
           });
-        },
-        onApprove: async (data: any, actions: any) => {
-          const order = await actions.order.capture();
-          console.log("Payment successful:", order);
+          if (!response.ok) {
+            throw new Error("Unable to create PayPal order.");
+          }
+          const data = await response.json();
+          return { orderId: data.orderId };
+        };
 
-          const purchase = {
-            orderId: order.id,
-            plan: "weekly",
-            calls: 50,
-            purchasedAt: new Date().toISOString(),
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-          };
-          localStorage.setItem("prankai.purchase", JSON.stringify(purchase));
+        await Promise.all([setupButton("daily"), setupButton("weekly"), setupButton("monthly")]);
+        setPaypalStatus("ready");
+      } catch (error) {
+        console.error("PayPal SDK initialization error:", error);
+        setPaypalStatus("error");
+        setPaypalError("Unable to initialize PayPal. Please try again later.");
+      }
+    };
 
-          window.location.href = "/upgrade/success?plan=weekly";
-        },
-        onError: (err: any) => {
-          console.error("PayPal error:", err);
-          alert("Payment failed. Please try again.");
-        }
-      })
-      .render("#paypal-weekly");
-
-    // Monthly Pass - Unlimited
-    window.paypal
-      .Buttons({
-        createOrder: (data: any, actions: any) => {
-          return actions.order.create({
-            purchase_units: [
-              {
-                description: "PrankAI Monthly Pass - Unlimited Calls",
-                amount: {
-                  currency_code: "USD",
-                  value: "29.99"
-                },
-                payee: {
-                  email_address: "lafaverspam@gmail.com"
-                }
-              }
-            ],
-            application_context: {
-              shipping_preference: "NO_SHIPPING"
-            }
-          });
-        },
-        onApprove: async (data: any, actions: any) => {
-          const order = await actions.order.capture();
-          console.log("Payment successful:", order);
-
-          const purchase = {
-            orderId: order.id,
-            plan: "monthly",
-            calls: 999,
-            purchasedAt: new Date().toISOString(),
-            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-          };
-          localStorage.setItem("prankai.purchase", JSON.stringify(purchase));
-
-          window.location.href = "/upgrade/success?plan=monthly";
-        },
-        onError: (err: any) => {
-          console.error("PayPal error:", err);
-          alert("Payment failed. Please try again.");
-        }
-      })
-      .render("#paypal-monthly");
-  }, [loading]);
+    void initializeButtons();
+  }, [sdkLoaded]);
 
   return (
     <div className="grid" style={{ gap: 32 }}>
@@ -190,8 +210,9 @@ export default function UpgradePage() {
             <li>24 hour access</li>
           </ul>
 
-          <div id="paypal-daily" style={{ marginTop: "auto" }}></div>
-          {loading && <div className="btn" style={{ opacity: 0.5 }}>Loading PayPal...</div>}
+          <paypal-button data-plan="daily" hidden></paypal-button>
+          {paypalStatus === "loading" && <div className="btn" style={{ opacity: 0.5 }}>Loading PayPal...</div>}
+          {paypalStatus === "error" && <div className="btn" style={{ opacity: 0.6 }}>{paypalError}</div>}
         </div>
 
         {/* Weekly Pass */}
@@ -229,8 +250,9 @@ export default function UpgradePage() {
             <li style={{ fontWeight: 700, color: "#2e86ff" }}>Save 40% vs daily</li>
           </ul>
 
-          <div id="paypal-weekly" style={{ marginTop: "auto" }}></div>
-          {loading && <div className="btn" style={{ opacity: 0.5 }}>Loading PayPal...</div>}
+          <paypal-button data-plan="weekly" hidden></paypal-button>
+          {paypalStatus === "loading" && <div className="btn" style={{ opacity: 0.5 }}>Loading PayPal...</div>}
+          {paypalStatus === "error" && <div className="btn" style={{ opacity: 0.6 }}>{paypalError}</div>}
         </div>
 
         {/* Monthly Pass */}
@@ -252,8 +274,9 @@ export default function UpgradePage() {
             <li style={{ fontWeight: 700, color: "#43d4d8" }}>Best value</li>
           </ul>
 
-          <div id="paypal-monthly" style={{ marginTop: "auto" }}></div>
-          {loading && <div className="btn" style={{ opacity: 0.5 }}>Loading PayPal...</div>}
+          <paypal-button data-plan="monthly" hidden></paypal-button>
+          {paypalStatus === "loading" && <div className="btn" style={{ opacity: 0.5 }}>Loading PayPal...</div>}
+          {paypalStatus === "error" && <div className="btn" style={{ opacity: 0.6 }}>{paypalError}</div>}
         </div>
       </div>
 

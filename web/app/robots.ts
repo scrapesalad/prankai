@@ -1,5 +1,5 @@
 export default function robots() {
-  const baseUrl = "https://prankai.com";
+  const baseUrl = "https://prankai.fun";
   return {
     rules: {
       userAgent: "*",
