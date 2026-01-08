@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { templates, templateById } from "../../../lib/templates";
+import { buildSystemPrompt, normalizeText, validatePromptInput } from "../../../lib/prompt";
+import { isValidE164, normalizePhone } from "../../../lib/validation";
 
 const VAPI_API_KEY = process.env.VAPI_PRIVATE_KEY;
 const VAPI_PHONE_ID = process.env.VAPI_PHONE_ID;
@@ -10,34 +12,42 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const template = templateById[body.templateId] || templates[0];
+  const customTemplate = body?.template;
+  const template =
+    customTemplate && typeof customTemplate.systemPrompt === "string" && typeof customTemplate.firstMessage === "string"
+      ? customTemplate
+      : templateById[body.templateId] || templates[0];
 
-  const systemPrompt = [
-    `You are ${body.callerName}.`,
-    template.systemPrompt.replace("{culprit}", body.culpritName || "there"),
-    "",
-    "Conversation phases:",
-    `- Hook: ${body.hook}`,
-    `- Confusion: ${body.confusion}`,
-    `- Escalation: ${body.escalation}`,
-    `- Resolution: ${body.resolution}`,
-    "",
-    "Rules:",
-    "- Ask 1 question at a time.",
-    "- Mirror the user's last phrase briefly before your next question.",
-    "- Confirm key details when mentioned.",
-    "- Avoid long monologues (keep responses under 2 sentences when possible).",
-    "",
-    `Additional instructions: ${body.customPrompt}`,
-    "",
-    "Exit triggers:",
-    "- If the user is upset or asks to stop, apologize and end the call.",
-    `- If silence for ${body.silenceTimeout} seconds, politely end the call.`
-  ].join("\n");
+  const input = {
+    callerName: normalizeText(body.callerName),
+    culpritName: normalizeText(body.culpritName),
+    systemPrompt: template.systemPrompt,
+    customPrompt: normalizeText(body.customPrompt),
+    hook: normalizeText(body.hook),
+    confusion: normalizeText(body.confusion),
+    escalation: normalizeText(body.escalation),
+    resolution: normalizeText(body.resolution),
+    silenceTimeout: Number(body.silenceTimeout) || 8
+  };
+
+  const normalizedPhone = normalizePhone(body.phoneNumber || "");
+  if (!isValidE164(normalizedPhone)) {
+    return NextResponse.json({ error: "Phone number must be valid E.164 (e.g., +15550001234)." }, { status: 400 });
+  }
+
+  const promptError = validatePromptInput(input, template.firstMessage);
+  if (promptError) {
+    return NextResponse.json({ error: promptError }, { status: 400 });
+  }
+
+  const systemPrompt = buildSystemPrompt(input);
+  const firstMessage = template.firstMessage
+    .replace("{culprit}", input.culpritName || "there")
+    .replace("{caller}", input.callerName || "there");
 
   const payload = {
     phoneNumberId: VAPI_PHONE_ID,
-    customer: { number: body.phoneNumber },
+    customer: { number: normalizedPhone },
     assistant: {
       backgroundSound: "off",
       recordingEnabled: Boolean(body.recordCall),
@@ -56,7 +66,7 @@ export async function POST(request: NextRequest) {
         "unsubscribe"
       ],
       endCallMessage: "Understood. I will not call again. Goodbye.",
-      firstMessage: template.firstMessage.replace("{culprit}", body.culpritName || "there"),
+      firstMessage,
       model: {
         provider: "openai",
         model: "gpt-4o",

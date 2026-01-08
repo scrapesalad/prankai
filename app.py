@@ -19,15 +19,51 @@ def get_secret(key: str) -> Optional[str]:
     except Exception:
         return None
 
+def load_env_file(path: str) -> dict[str, str]:
+    values: dict[str, str] = {}
+    if not os.path.exists(path):
+        return values
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            for raw in handle:
+                line = raw.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, value = line.split("=", 1)
+                values[key.strip()] = value.strip().strip('"').strip("'")
+    except Exception:
+        return {}
+    return values
+
+# Load keys from web/.env.local as a fallback for local dev.
+env_fallbacks = load_env_file(os.path.join(os.getcwd(), "web", ".env.local"))
+
 # OpenAI Configuration
-OPENAI_API_KEY = get_secret("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY")
+OPENAI_API_KEY = (
+    get_secret("OPENAI_API_KEY")
+    or os.environ.get("OPENAI_API_KEY")
+    or env_fallbacks.get("OPENAI_API_KEY")
+)
 
 # VAPI Configuration
-VAPI_API_KEY = get_secret("VAPI_PRIVATE_KEY") or os.environ.get("VAPI_PRIVATE_KEY")
-VAPI_PHONE_ID = get_secret("VAPI_PHONE_ID") or os.environ.get("VAPI_PHONE_ID")
+VAPI_API_KEY = (
+    get_secret("VAPI_PRIVATE_KEY")
+    or os.environ.get("VAPI_PRIVATE_KEY")
+    or env_fallbacks.get("VAPI_PRIVATE_KEY")
+)
+VAPI_PHONE_ID = (
+    get_secret("VAPI_PHONE_ID")
+    or os.environ.get("VAPI_PHONE_ID")
+    or env_fallbacks.get("VAPI_PHONE_ID")
+)
 
 # App configuration
-APP_BASE_URL = get_secret("APP_BASE_URL") or os.environ.get("APP_BASE_URL") or "http://localhost:8501"
+APP_BASE_URL = (
+    get_secret("APP_BASE_URL")
+    or os.environ.get("APP_BASE_URL")
+    or env_fallbacks.get("NEXT_PUBLIC_APP_URL")
+    or "http://localhost:8501"
+)
 
 
 st.title("🎧 Prank Dial AI")
@@ -151,6 +187,12 @@ st.subheader("2. Make a Call")
 
 customer_number = st.text_input("Customer Phone Number (E.164 format, e.g., +15550001234)")
 
+def normalize_phone(number: str) -> str:
+    return re.sub(r"[\s\-\(\)]", "", number or "")
+
+def normalize_text(value: str) -> str:
+    return (value or "").strip()
+
 def is_valid_e164(number: str) -> bool:
     return bool(re.match(r"^\+[1-9]\d{7,14}$", number or ""))
 
@@ -160,14 +202,84 @@ def is_blocked_number(number: str) -> bool:
     blocked = {"911", "112", "999", "110", "118", "119"}
     return normalized in blocked or len(normalized) <= 3
 
+def validate_prompts() -> tuple[bool, str]:
+    if not normalize_text(culprit_name):
+        return False, "Culprit name cannot be empty."
+    if not normalize_text(caller_name):
+        return False, "Caller name cannot be empty."
+    if not normalize_text(system_prompt):
+        return False, "System prompt cannot be empty."
+    if not normalize_text(first_message):
+        return False, "First message cannot be empty."
+    for label, value in [
+        ("Hook", hook),
+        ("Confusion", confusion),
+        ("Escalation", escalation),
+        ("Resolution", resolution),
+    ]:
+        if not normalize_text(value):
+            return False, f"{label} cannot be empty."
+    try:
+        system_prompt.format(
+            culprit=normalize_text(culprit_name),
+            caller=normalize_text(caller_name),
+        )
+        first_message.format(
+            culprit=normalize_text(culprit_name),
+            caller=normalize_text(caller_name),
+        )
+    except KeyError as exc:
+        return False, f"Prompt template is missing a value for {exc}."
+    except Exception as exc:
+        return False, f"Prompt template error: {exc}"
+    return True, ""
+
+def build_system_prompt() -> str:
+    caller = normalize_text(caller_name)
+    culprit = normalize_text(culprit_name)
+    scenario = system_prompt.format(culprit=culprit, caller=caller)
+    custom_rules = normalize_text(custom_prompt)
+
+    sections = [
+        "ROLE:",
+        f"You are {caller}.",
+        "",
+        "SCENARIO:",
+        scenario,
+        "",
+        "CONVERSATION PROGRAM:",
+        f"- Hook: {normalize_text(hook)}",
+        f"- Confusion: {normalize_text(confusion)}",
+        f"- Escalation: {normalize_text(escalation)}",
+        f"- Resolution: {normalize_text(resolution)}",
+        "",
+        "RULES:",
+        "- Ask 1 question at a time.",
+        "- Mirror the user's last phrase briefly before your next question.",
+        "- Confirm key details when mentioned.",
+        "- Avoid long monologues (keep responses under 2 sentences when possible).",
+    ]
+    if custom_rules:
+        sections.extend(["", "CUSTOM INSTRUCTIONS:", custom_rules])
+    sections.extend(
+        [
+            "",
+            "SAFETY:",
+            "- If the person asks you to stop or seems distressed, apologize and end the call.",
+            f"- If silence for {silence_timeout} seconds, politely end the call.",
+        ]
+    )
+    return "\n".join(sections).strip()
+
 def can_place_call() -> tuple[bool, str]:
     if not consent_confirmed:
         return False, "Consent is required before placing calls or recordings."
     if not customer_number:
         return False, "Please enter a phone number."
-    if not is_valid_e164(customer_number):
+    normalized_number = normalize_phone(customer_number)
+    if not is_valid_e164(normalized_number):
         return False, "Phone number must be valid E.164 (e.g., +15550001234)."
-    if is_blocked_number(customer_number):
+    if is_blocked_number(normalized_number):
         return False, "Calls to emergency/shortcode numbers are blocked."
     if record_call and jurisdiction in {"Two-party consent", "Not sure"} and not recording_consent_obtained:
         return False, "Recording consent is required in two-party/unsure jurisdictions."
@@ -184,8 +296,7 @@ def can_place_call() -> tuple[bool, str]:
 def get_client_ip() -> Optional[str]:
     # Best-effort IP detection (works behind proxies that set headers).
     try:
-        from streamlit.web.server.websocket_headers import _get_websocket_headers
-        headers = _get_websocket_headers() or {}
+        headers = st.context.headers or {}
         xff = headers.get("X-Forwarded-For") or headers.get("x-forwarded-for")
         if xff:
             return xff.split(",")[0].strip()
@@ -224,7 +335,7 @@ def rate_limit_ok() -> tuple[bool, str]:
         return True, "Rate limit applied per session (IP unavailable)."
     return True, ""
 
-start_disabled = not is_valid_e164(customer_number)
+start_disabled = not is_valid_e164(normalize_phone(customer_number))
 if start_disabled:
     st.caption("Enter a valid E.164 number to enable call start.")
 
@@ -235,31 +346,21 @@ if st.button("📞 Start AI Call", disabled=start_disabled):
     elif not VAPI_API_KEY or not VAPI_PHONE_ID:
         st.error("Please enter your API Keys in the sidebar.")
     else:
+        ok, message = validate_prompts()
+        if not ok:
+            st.error(message)
+            st.stop()
         ok, message = rate_limit_ok()
         if not ok:
             st.error(message)
         else:
             if message:
                 st.info(message)
-            rendered_system_prompt = (
-                f"You are {caller_name}. "
-                + system_prompt.format(culprit=culprit_name)
-                + "\n\nConversation phases:\n"
-                + f"- Hook: {hook}\n"
-                + f"- Confusion: {confusion}\n"
-                + f"- Escalation: {escalation}\n"
-                + f"- Resolution: {resolution}\n\n"
-                + "Rules:\n"
-                + "- Ask 1 question at a time.\n"
-                + "- Mirror the user's last phrase briefly before your next question.\n"
-                + "- Confirm key details when mentioned.\n"
-                + "- Avoid long monologues (keep responses under 2 sentences when possible).\n\n"
-                + f"Additional instructions: {custom_prompt}\n\n"
-                + "Exit triggers:\n"
-                + "- If the user is upset or asks to stop, apologize and end the call.\n"
-                + f"- If silence for {silence_timeout} seconds, politely end the call.\n"
+            rendered_system_prompt = build_system_prompt()
+            rendered_first_message = first_message.format(
+                culprit=normalize_text(culprit_name),
+                caller=normalize_text(caller_name),
             )
-            rendered_first_message = first_message.format(culprit=culprit_name)
 
             # Construct the API request to Vapi
             headers = {
@@ -270,7 +371,7 @@ if st.button("📞 Start AI Call", disabled=start_disabled):
             payload = {
                 "phoneNumberId": VAPI_PHONE_ID,
                 "customer": {
-                    "number": customer_number
+                    "number": normalize_phone(customer_number)
                 },
                 "assistant": {
                     "backgroundSound": "off",
@@ -309,15 +410,7 @@ if st.button("📞 Start AI Call", disabled=start_disabled):
                     }
                 }
             }
-            if record_call and play_consent_message:
-                payload["assistant"]["recordingConsentPlan"] = {
-                    "type": "stay-on-line",
-                    "message": (
-                        "For quality and safety purposes, this call may be recorded. "
-                        "Please stay on the line if you consent, or hang up to decline."
-                    ),
-                    "waitSeconds": 3
-                }
+            # NOTE: recordingConsentPlan rejected by current Vapi API; omit to avoid 400s.
 
             try:
                 with st.spinner("Starting call..."):
@@ -334,6 +427,59 @@ if st.button("📞 Start AI Call", disabled=start_disabled):
                     st.write(response.text)
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+
+st.markdown("#### ?? Dry-Run Chat (Text)")
+dry_run_user_message = st.text_input(
+    "Dry-run user reply",
+    value="Hello? Who is this?",
+    key="dry_run_user_message"
+)
+if st.button("?? Run Dry-Run Chat"):
+    ok, message = validate_prompts()
+    if not ok:
+        st.error(message)
+    elif not OPENAI_API_KEY:
+        st.error("OPENAI_API_KEY is required for dry-run chat.")
+    elif not normalize_text(dry_run_user_message):
+        st.error("Please enter a dry-run user reply.")
+    else:
+        rendered_system_prompt = build_system_prompt()
+        rendered_first_message = first_message.format(
+            culprit=normalize_text(culprit_name),
+            caller=normalize_text(caller_name),
+        )
+        try:
+            with st.spinner("Running dry-run chat..."):
+                response = requests.post(
+                    "https://api.openai.com/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {OPENAI_API_KEY}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "model": "gpt-4o-mini",
+                        "messages": [
+                            {"role": "system", "content": rendered_system_prompt},
+                            {"role": "assistant", "content": rendered_first_message},
+                            {"role": "user", "content": normalize_text(dry_run_user_message)},
+                        ],
+                        "temperature": 0.6,
+                    },
+                    timeout=30,
+                )
+            if response.ok:
+                result = response.json()
+                content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+                if content:
+                    st.success("Dry-run response:")
+                    st.text_area("Assistant reply", value=content, height=200)
+                else:
+                    st.error("Dry-run response was empty.")
+            else:
+                st.error("Dry-run chat failed.")
+                st.write(response.text)
+        except Exception as e:
+            st.error(f"Dry-run chat error: {e}")
 
 # --- 3. CALL LOGS & TRANSCRIPTS ---
 st.subheader("3. Recent Calls & Transcripts")
