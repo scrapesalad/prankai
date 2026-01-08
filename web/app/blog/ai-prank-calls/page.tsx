@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import MascotHint from "../../../components/MascotHint";
 
 const heroImage = "/images/ai-control-room.png";
 const logoImage = "/images/prank-dial-ai-logo.png";
@@ -94,6 +95,10 @@ export default function AiPrankCallsPage() {
       </figure>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: jokes land better when the hook sounds like a real mix-up."
+          image="/images/mascot/uvO5q40CRFOYaeRVd_6fTg.jpg"
+        />
         <h2>The Problem With Traditional Prank Calls</h2>
         <p>
           Lets be honest. Classic prank calls were funny until they were not. They leaned on yelling, fake authority
@@ -108,6 +113,10 @@ export default function AiPrankCallsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: structure beats shock. Keep it calm and curious."
+          image="/images/mascot/8CXPHlLAQ4KMkxQv1u594Q.webp"
+        />
         <h2>What Are AI Prank Calls?</h2>
         <p>
           AI prank calls use conversational AI to respond in real time, follow a story arc, and adapt to whatever the
@@ -138,6 +147,10 @@ export default function AiPrankCallsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: confusion is funnier than chaos. Let the moment breathe."
+          image="/images/mascot/M0rNa8HyTC2PGiZArFeDKQ.webp"
+        />
         <h2>Why AI Prank Calls Are Way Funnier</h2>
         <h3>1. Confusion beats shock every time</h3>
         <p>
@@ -166,6 +179,10 @@ export default function AiPrankCallsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: start with what already works, then remix it."
+          image="/images/mascot/pcCg5WDRTPKzKEtQBkc2Xw.jpg"
+        />
         <h2>Real Examples That Actually Work</h2>
         <p>
           We test prank call scripts constantly, and the winners always rely on structured confusion. Here are a few that
@@ -185,6 +202,10 @@ export default function AiPrankCallsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: never punch down. The situation is the joke, not the person."
+          image="/images/mascot/in-A3UI2SOaqPeoVXtYUww.jpg"
+        />
         <h2>How We Design Ethical Prank Calls</h2>
         <p>
           Ethical prank calls are not soft, they are sharp. The trick is to aim the joke at the situation, not the
@@ -204,6 +225,10 @@ export default function AiPrankCallsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: consent first, always. It keeps the laughs legal."
+          image="/images/mascot/4qTGWF2-TSKMjaOMMPhtow.webp"
+        />
         <h2>Are AI Prank Calls Legal?</h2>
         <p>
           Short answer: yes, when done right. Long answer: it depends on consent, recording rules, and the content of the
@@ -223,6 +248,10 @@ export default function AiPrankCallsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: look for tools that protect the vibe, not just the punchline."
+          image="/images/mascot/fnYiHBrJQ_SJkaNxuVHOlg.webp"
+        />
         <h2>How to Choose a Prank Call App in 2026</h2>
         <p>
           There are more prank tools than ever, but a prank call app should help you be funny without being reckless. If
@@ -243,6 +272,10 @@ export default function AiPrankCallsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: one clear hook beats a page of dialogue."
+          image="/images/mascot/mnMIvIQ3RWCPDFwRA_k-EA.jpg"
+        />
         <h2>How to Build Your Own AI Prank Call</h2>
         <p>
           If you want to design your own call, the safest approach is to start with a tiny premise and build upward. I
@@ -272,6 +305,10 @@ export default function AiPrankCallsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: clean exits keep the story funny after the call."
+          image="/images/mascot/uvO5q40CRFOYaeRVd_6fTg.jpg"
+        />
         <h2>Why We Built Prank Dial AI</h2>
         <p>
           Founder moment: I loved prank calls growing up, but I hated how fast they turned mean. I wanted a prank call
@@ -290,6 +327,10 @@ export default function AiPrankCallsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: if the joke needs someone to feel bad, scrap it."
+          image="/images/mascot/8CXPHlLAQ4KMkxQv1u594Q.webp"
+        />
         <h2>Try an AI Prank Call the Right Way</h2>
         <p>
           If you want smarter laughs, shareable moments, and zero regrets, AI prank calls are it. Just remember the rule

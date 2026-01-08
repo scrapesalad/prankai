@@ -1,5 +1,6 @@
 // app/terms/page.tsx
 import type { Metadata } from "next";
+import MascotHint from "../../components/MascotHint";
 
 export const metadata: Metadata = {
   title: "Terms of Service - Prank Dial AI",
@@ -13,6 +14,10 @@ export default function TermsPage() {
         <h1>Terms of Service</h1>
         <p className="blog-intro">Last Updated: January 7, 2026</p>
       </div>
+      <MascotHint
+        text="Pranklyn says: the rules keep the fun friendly and the calls legal."
+        image="/images/mascot/mnMIvIQ3RWCPDFwRA_k-EA.jpg"
+      />
 
       <section className="card">
         <h2>1. Acceptance of Terms</h2>

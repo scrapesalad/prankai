@@ -1,5 +1,6 @@
 // app/privacy/page.tsx
 import type { Metadata } from "next";
+import MascotHint from "../../components/MascotHint";
 
 export const metadata: Metadata = {
   title: "Privacy Policy - Prank Dial AI",
@@ -13,6 +14,10 @@ export default function PrivacyPage() {
         <h1>Privacy Policy</h1>
         <p className="blog-intro">Last Updated: January 7, 2026</p>
       </div>
+      <MascotHint
+        text="Pranklyn says: privacy stays simple here. We only use what keeps the app running safely."
+        image="/images/mascot/8CXPHlLAQ4KMkxQv1u594Q.webp"
+      />
 
       <section className="card">
         <h2>1. Information We Collect</h2>

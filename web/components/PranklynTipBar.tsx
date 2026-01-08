@@ -73,11 +73,6 @@ export default function PranklynTipBar() {
       </div>
       <div className="pranklyn-tipbar-media">
         <img src={heroImage} alt="Pranklyn sharing a tip" />
-        <div className="pranklyn-tipbar-avatars">
-          {images.map((image) => (
-            <img key={image} src={image} alt="Pranklyn mascot portrait" />
-          ))}
-        </div>
       </div>
     </section>
   );

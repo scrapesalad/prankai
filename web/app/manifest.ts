@@ -11,7 +11,7 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#0f1d2a",
     icons: [
       {
-        src: "/images/prank-dial-ai-logo.png",
+        src: "/icon.png",
         sizes: "512x512",
         type: "image/png"
       }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { leaderboardRows, computeMetrics } from "../../lib/analytics";
 import { templateById } from "../../lib/templates";
+import MascotHint from "../../components/MascotHint";
 
 const baseUrl = "https://prankai.com";
 
@@ -75,6 +76,10 @@ export default async function TrendingPage() {
         <h1>Trending Templates</h1>
         <p className="muted">Based on recent calls. Update cadence follows new calls.</p>
       </header>
+      <MascotHint
+        text="Pranklyn says: borrow what works, then personalize the opening line."
+        image="/images/mascot/M0rNa8HyTC2PGiZArFeDKQ.webp"
+      />
       <section className="card">
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>

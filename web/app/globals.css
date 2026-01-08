@@ -67,19 +67,6 @@ main {
   box-shadow: 0 12px 24px rgba(20, 40, 70, 0.2);
 }
 
-.pranklyn-tipbar-avatars {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
-  gap: 8px;
-}
-
-.pranklyn-tipbar-avatars img {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.7);
-}
 
 .card {
   background: #ffffff;

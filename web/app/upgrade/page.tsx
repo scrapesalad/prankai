@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import MascotHint from "../../components/MascotHint";
 
 type PlanId = "daily" | "weekly" | "monthly";
 
@@ -190,6 +191,10 @@ export default function UpgradePage() {
         <h1>Upgrade Your Plan</h1>
         <p className="blog-intro">Get more calls and unlock unlimited prank potential.</p>
       </section>
+      <MascotHint
+        text="Pranklyn says: pick the plan that matches how many friends you want to prank this week."
+        image="/images/mascot/pcCg5WDRTPKzKEtQBkc2Xw.jpg"
+      />
 
       <div className="grid" style={{ gap: 24, gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
         {/* Daily Pass */}

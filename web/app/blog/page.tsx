@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import MascotHint from "../../components/MascotHint";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -79,6 +80,10 @@ export default function BlogIndexPage() {
           Founder notes, prank call science, and the ethics of staying funny without being weird about it.
         </p>
       </header>
+      <MascotHint
+        text="Pranklyn says: skim the headers, then read the section you actually need."
+        image="/images/mascot/pcCg5WDRTPKzKEtQBkc2Xw.jpg"
+      />
 
       <section className="grid blog-list">
         {posts.map((post) => (

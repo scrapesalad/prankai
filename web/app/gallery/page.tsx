@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { templates } from "../../lib/templates";
 import CopyLink from "../../components/CopyLink";
+import MascotHint from "../../components/MascotHint";
 
 const baseUrl = "https://prankai.com";
 
@@ -52,6 +53,10 @@ export default function GalleryPage() {
         <h1>Template Gallery</h1>
         <p className="muted">Indexable gallery for sharing prank templates.</p>
       </header>
+      <MascotHint
+        text="Pranklyn says: pick a hook you can explain in one breath, then customize the names."
+        image="/images/mascot/in-A3UI2SOaqPeoVXtYUww.jpg"
+      />
       <section className="grid grid-2">
         {templates.map((template) => (
           <div className="card" key={template.id}>

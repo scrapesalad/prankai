@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import MascotHint from "../../../components/MascotHint";
 
 const baseUrl = "https://prankai.com";
 const heroImage = "/images/emoji-prank-pattern.png";
@@ -94,6 +95,10 @@ export default function PrankCallingTips2025Page() {
       </figure>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: keep the intro short, then let them speak."
+          image="/images/mascot/uvO5q40CRFOYaeRVd_6fTg.jpg"
+        />
         <p>
           If you are here looking for prank calling tips that actually make people laugh and do not end with guilt,
           yelling, or regret, you are in the right place. I have messed this up enough times to know what works, what does
@@ -102,6 +107,10 @@ export default function PrankCallingTips2025Page() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: confusion + politeness is the sweet spot."
+          image="/images/mascot/pcCg5WDRTPKzKEtQBkc2Xw.jpg"
+        />
         <h2>What Makes a Prank Call Actually Funny</h2>
         <p>
           Here is the truth nobody tells beginners: the joke is not the prank, the reaction is the prank. Early on, I
@@ -121,6 +130,10 @@ export default function PrankCallingTips2025Page() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: plan lightly, then improvise calmly."
+          image="/images/mascot/4qTGWF2-TSKMjaOMMPhtow.webp"
+        />
         <h2>Prank Calling Tips Every Beginner Should Know</h2>
         <p>
           If you are new, slow down. First tip: plan lightly. Not a full script. Just a premise. Know who you are and why
@@ -139,6 +152,10 @@ export default function PrankCallingTips2025Page() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: keep it low stakes and everyday."
+          image="/images/mascot/in-A3UI2SOaqPeoVXtYUww.jpg"
+        />
         <h2>Best Types of Harmless Prank Calls That Always Work</h2>
         <p>
           Some prank call formats just work. Confusion-based pranks are gold. Asking polite but slightly wrong questions
@@ -153,6 +170,10 @@ export default function PrankCallingTips2025Page() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: if it feels risky, bail early."
+          image="/images/mascot/mnMIvIQ3RWCPDFwRA_k-EA.jpg"
+        />
         <h2>Prank Calling Tips to Avoid Getting Caught</h2>
         <p>
           Your voice is everything. Speak slightly slower than normal. Calm equals believable. Background noise gives you
@@ -165,6 +186,10 @@ export default function PrankCallingTips2025Page() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: know the laws before you dial."
+          image="/images/mascot/8CXPHlLAQ4KMkxQv1u594Q.webp"
+        />
         <h2>Legal and Ethical Prank Calling Rules You Should Follow</h2>
         <p>
           Never record calls without knowing the law. Some places require consent. Some do not. Know before you dial.
@@ -178,6 +203,10 @@ export default function PrankCallingTips2025Page() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: personas win when the tone stays friendly."
+          image="/images/mascot/M0rNa8HyTC2PGiZArFeDKQ.webp"
+        />
         <h2>Advanced Prank Calling Tips for Experienced Callers</h2>
         <p>
           Once you have the basics down, it gets fun. Character work changes everything. A clear persona makes
@@ -195,6 +224,10 @@ export default function PrankCallingTips2025Page() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: kindness is the long-term strategy."
+          image="/images/mascot/fnYiHBrJQ_SJkaNxuVHOlg.webp"
+        />
         <h2>Conclusion</h2>
         <p>
           Prank calling is not about shock. It is about timing, tone, and restraint. The best prank calling tips lead to

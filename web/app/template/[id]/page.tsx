@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { templateById } from "../../../lib/templates";
+import MascotHint from "../../../components/MascotHint";
 
 type Params = { params: { id: string } };
 
@@ -41,6 +42,10 @@ export default function TemplatePage({ params }: Params) {
         <h1>{template.name}</h1>
         <p className="muted">{template.tagline}</p>
       </header>
+      <MascotHint
+        text="Pranklyn says: read the preview out loud. If it sounds odd, tweak the hook."
+        image="/images/mascot/4qTGWF2-TSKMjaOMMPhtow.webp"
+      />
       <section className="card">
         <h3>Preview</h3>
         <p className="muted">{template.systemPrompt || "Custom template starter."}</p>

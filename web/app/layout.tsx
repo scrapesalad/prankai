@@ -28,16 +28,8 @@ export const metadata: Metadata = {
     images: ["/images/pranked.png"]
   },
   icons: {
-    icon: [
-      { url: "/images/faviconlogo/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/images/faviconlogo/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/images/faviconlogo/favicon.ico", sizes: "any" }
-    ],
-    apple: "/images/faviconlogo/apple-touch-icon.png",
-    other: [
-      { rel: "android-chrome-192x192", url: "/images/faviconlogo/android-chrome-192x192.png" },
-      { rel: "android-chrome-512x512", url: "/images/faviconlogo/android-chrome-512x512.png" }
-    ]
+    icon: "/icon.png",
+    apple: "/icon.png"
   },
   manifest: "/manifest.webmanifest"
 };

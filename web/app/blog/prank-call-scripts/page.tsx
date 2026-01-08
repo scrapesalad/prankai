@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import MascotHint from "../../../components/MascotHint";
 
 const heroImage = "/images/emoji-prank-pattern.png";
 const logoImage = "/images/prank-dial-ai-logo.png";
@@ -94,6 +95,10 @@ export default function PrankCallScriptsPage() {
       </figure>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: give the other person space to respond, not a wall of words."
+          image="/images/mascot/pcCg5WDRTPKzKEtQBkc2Xw.jpg"
+        />
         <h2>Why Most Prank Call Scripts Fail</h2>
         <p>
           I have tested hundreds of scripts. The ones that fail die in under 15 seconds. They reveal the joke too fast,
@@ -107,6 +112,10 @@ export default function PrankCallScriptsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: hook, confusion, escalation, resolution. Keep it tidy."
+          image="/images/mascot/4qTGWF2-TSKMjaOMMPhtow.webp"
+        />
         <h2>The Anatomy of a Great Prank Call Script</h2>
         <p>
           Every high-performing script follows an arc. We call it the conversation program because it is about behavior,
@@ -136,6 +145,10 @@ export default function PrankCallScriptsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: low-stakes confusion is the easiest win."
+          image="/images/mascot/in-A3UI2SOaqPeoVXtYUww.jpg"
+        />
         <h2>Script Example: Six Seven</h2>
         <p>
           This is the simplest script we have, and it consistently keeps people on the line. It is low-stakes and easy
@@ -156,6 +169,10 @@ export default function PrankCallScriptsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: let the AI handle curveballs while you keep the arc steady."
+          image="/images/mascot/M0rNa8HyTC2PGiZArFeDKQ.webp"
+        />
         <h2>Why AI Makes Scripts Better</h2>
         <p>
           Traditional prank call scripts assume people follow the plan. They do not. A voice AI prank call adapts to
@@ -174,6 +191,10 @@ export default function PrankCallScriptsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: pull templates from everyday moments to keep it believable."
+          image="/images/mascot/8CXPHlLAQ4KMkxQv1u594Q.webp"
+        />
         <h2>Script Templates That Consistently Work</h2>
         <p>
           We keep a library of funny prank call ideas that are built around everyday moments. These are the scripts that
@@ -197,6 +218,10 @@ export default function PrankCallScriptsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: always offer a clean exit when the vibe shifts."
+          image="/images/mascot/mnMIvIQ3RWCPDFwRA_k-EA.jpg"
+        />
         <h2>Writing Scripts That Do Not Get Hung Up On</h2>
         <p>
           I have made every mistake here. I once wrote a script that sounded too official, and the person went silent
@@ -219,6 +244,10 @@ export default function PrankCallScriptsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: track curiosity, not chaos. Long calls should feel easy."
+          image="/images/mascot/fnYiHBrJQ_SJkaNxuVHOlg.webp"
+        />
         <h2>How We Test Prank Call Scripts</h2>
         <p>
           I used to think a script was good if it sounded funny in my head. That was wrong. A good script is measured by
@@ -238,6 +267,10 @@ export default function PrankCallScriptsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: shorten the hook before you add more detail."
+          image="/images/mascot/uvO5q40CRFOYaeRVd_6fTg.jpg"
+        />
         <h2>Common Script Pitfalls to Avoid</h2>
         <p>
           The most common mistake is over-explaining. When you add too much detail, the call starts to sound fake. The
@@ -257,6 +290,10 @@ export default function PrankCallScriptsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: pauses are the punchline. Let the moment land."
+          image="/images/mascot/4qTGWF2-TSKMjaOMMPhtow.webp"
+        />
         <h2>How to Tune Tone and Timing</h2>
         <p>
           Timing is the difference between an awkward call and a funny one. In our tests, the sweet spot is a calm hook,
@@ -276,6 +313,10 @@ export default function PrankCallScriptsPage() {
       </section>
 
       <section>
+        <MascotHint
+          text="Pranklyn says: repeatable structure beats one-off jokes."
+          image="/images/mascot/in-A3UI2SOaqPeoVXtYUww.jpg"
+        />
         <h2>Scripts Are the Product</h2>
         <p>
           At scale, prank call scripts are not just jokes, they are experiences. The better the script, the longer the
