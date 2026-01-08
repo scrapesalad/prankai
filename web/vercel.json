@@ -1,4 +1,18 @@
 {
   "framework": "nextjs",
-  "rootDirectory": "web"
+  "rootDirectory": "web",
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "query",
+          "key": "template",
+          "value": "(?<template>.*)"
+        }
+      ],
+      "destination": "/template/:template",
+      "permanent": true
+    }
+  ]
 }
