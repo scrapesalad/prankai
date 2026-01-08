@@ -22,7 +22,7 @@ export default function HomePage() {
   const [culpritName, setCulpritName] = useState("Chris");
   const [callerName, setCallerName] = useState("Sterling");
   const [customPrompt, setCustomPrompt] = useState(
-    \"Keep the tone playful but believable. If they ask who this is, restate your name calmly.\"
+    "Keep the tone playful but believable. If they ask who this is, restate your name calmly."
   );
   const [phoneNumber, setPhoneNumber] = useState("");
   const [recordCall, setRecordCall] = useState(true);
