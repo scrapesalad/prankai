@@ -64,6 +64,11 @@ export async function POST(request: NextRequest) {
       durationDays: config.durationDays
     });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to create PayPal order." }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("PayPal order creation error:", errorMessage, error);
+    return NextResponse.json(
+      { error: `Failed to create PayPal order: ${errorMessage}` },
+      { status: 500 }
+    );
   }
 }

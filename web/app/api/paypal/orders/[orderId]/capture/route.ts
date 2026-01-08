@@ -18,6 +18,11 @@ export async function POST(
 
     return NextResponse.json(capture);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to capture PayPal order." }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("PayPal order capture error:", errorMessage, error);
+    return NextResponse.json(
+      { error: `Failed to capture PayPal order: ${errorMessage}` },
+      { status: 500 }
+    );
   }
 }

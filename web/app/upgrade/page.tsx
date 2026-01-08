@@ -48,9 +48,40 @@ export default function UpgradePage() {
   const [paypalStatus, setPaypalStatus] = useState<"loading" | "ready" | "error">("loading");
   const [paypalError, setPaypalError] = useState<string | null>(null);
   const initializedRef = useRef(false);
+  const scriptLoadedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple script loads
+    if (scriptLoadedRef.current) {
+      if (window.paypal) {
+        setSdkLoaded(true);
+      }
+      return;
+    }
+
+    // Check if PayPal SDK is already loaded (from previous page load)
+    if (window.paypal) {
+      setSdkLoaded(true);
+      scriptLoadedRef.current = true;
+      return;
+    }
+
+    // Check if script is already in the DOM
+    const existingScript = document.querySelector('script[src*="paypal.com/web-sdk"]');
+    if (existingScript) {
+      scriptLoadedRef.current = true;
+      if (window.paypal) {
+        setSdkLoaded(true);
+      } else {
+        existingScript.addEventListener('load', () => {
+          setSdkLoaded(true);
+        });
+      }
+      return;
+    }
+
     // Load PayPal SDK v6
+    scriptLoadedRef.current = true;
     const script = document.createElement("script");
     const paypalEnv = process.env.NEXT_PUBLIC_PAYPAL_ENV || "sandbox";
     script.src =
@@ -61,13 +92,11 @@ export default function UpgradePage() {
     script.onload = () => setSdkLoaded(true);
     script.onerror = () => {
       setPaypalStatus("error");
-      setPaypalError("Unable to load PayPal. Please try again later.");
+      setPaypalError("Unable to load PayPal SDK. Please check your connection and try again.");
+      scriptLoadedRef.current = false;
     };
+    
     document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
   }, []);
 
   useEffect(() => {
@@ -76,27 +105,41 @@ export default function UpgradePage() {
 
     const initializeButtons = async () => {
       try {
+        // Fetch client token
         const clientTokenResponse = await fetch("/api/paypal/client-token", { method: "POST" });
         if (!clientTokenResponse.ok) {
-          const errorText = await clientTokenResponse.text();
-          throw new Error(`Unable to get PayPal client token: ${errorText}`);
+          let errorData;
+          try {
+            errorData = await clientTokenResponse.json();
+          } catch {
+            const errorText = await clientTokenResponse.text();
+            errorData = { error: errorText };
+          }
+          console.error("PayPal client token error:", errorData);
+          throw new Error(errorData.error || `HTTP ${clientTokenResponse.status}: Unable to get PayPal client token`);
         }
-        const { clientToken } = await clientTokenResponse.json();
+        const tokenData = await clientTokenResponse.json();
+        const clientToken = tokenData.clientToken;
+        
         if (typeof clientToken !== "string" || !clientToken.length) {
+          console.error("Invalid client token format:", tokenData);
           throw new Error("PayPal client token is missing or invalid.");
         }
 
+        // Wait for PayPal SDK to be available
         const paypalSdk = window.paypal;
         if (!paypalSdk) {
-          throw new Error("PayPal SDK not available.");
+          throw new Error("PayPal SDK not available. Please refresh the page.");
         }
 
+        // Create SDK instance
         const sdkInstance = await paypalSdk.createInstance({
           clientToken,
           components: ["paypal-payments"],
           pageType: "checkout"
         });
 
+        // Check eligibility
         const eligibleMethods = await sdkInstance.findEligibleMethods({ currencyCode: "USD" });
         if (!eligibleMethods.isEligible("paypal")) {
           setPaypalStatus("error");
@@ -181,8 +224,9 @@ export default function UpgradePage() {
         setPaypalStatus("ready");
       } catch (error) {
         console.error("PayPal SDK initialization error:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unable to initialize PayPal. Please try again later.";
         setPaypalStatus("error");
-        setPaypalError("Unable to initialize PayPal. Please try again later.");
+        setPaypalError(errorMessage);
       }
     };
 
