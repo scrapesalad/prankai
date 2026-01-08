@@ -225,10 +225,59 @@ export default function HomePage() {
 
   return (
     <div className="grid" style={{ gap: 24 }}>
-      <header>
-        <h1>Prank Dial AI</h1>
-        <p className="muted">Design prank calls, share templates, and track what performs best.</p>
-      </header>
+      <section className="hero">
+        <div className="hero-content">
+          <div className="hero-tag">Prank Palz Studio</div>
+          <h1>Prank Dial AI</h1>
+          <p className="hero-subtitle">
+            Design playful calls, remix voice templates, and track what makes the laughs land.
+          </p>
+          <div className="hero-tags">
+            <span>Instant scripts</span>
+            <span>Shareable templates</span>
+            <span>Live listen</span>
+          </div>
+        </div>
+        <div className="hero-art">
+          <img src="/images/pranked.png" alt="Prank Palz illustration" />
+        </div>
+      </section>
+
+      <section className="feature-highlight">
+        <div>
+          <p className="feature-kicker">New drop</p>
+          <h2>67 prank templates, ready to remix.</h2>
+          <p className="feature-body">
+            Pick a tone, tweak the hook, and ship a call in minutes. Every template comes with a tested opener,
+            escalation path, and clean wrap-up so your prank stays funny and in-bounds.
+          </p>
+          <div className="feature-stats">
+            <div>
+              <strong>67</strong>
+              <span>Templates live</span>
+            </div>
+            <div>
+              <strong>4</strong>
+              <span>Story beats</span>
+            </div>
+            <div>
+              <strong>1</strong>
+              <span>Click to share</span>
+            </div>
+          </div>
+        </div>
+        <div className="feature-image">
+          <img src="/images/Untitled (Logo) (6).png" alt="67 prank templates highlight" />
+        </div>
+        <div className="feature-panel">
+          <h3>What’s inside</h3>
+          <ul>
+            <li>Workplace mix-ups, delivery errors, and friendly mix-and-match scripts.</li>
+            <li>Soft escalations that stay playful instead of aggressive.</li>
+            <li>Built-in safety checks for consent and recording.</li>
+          </ul>
+        </div>
+      </section>
 
       <section className="card grid" style={{ gap: 16 }}>
         <div className="grid grid-2">
